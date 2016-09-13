@@ -1,0 +1,42 @@
+//------------------------------------------------
+//--- 010 Editor v7.0 Binary Template
+//
+//      File: VBN
+//   Authors: Jam1garner
+//   Version: -
+//   Purpose: Bonesets in smash 4
+//  Category: Model/Bones
+//  ID Bytes: 20 4E 42 56
+//------------------------------------------------
+
+struct FILE{
+    struct HEADER{
+        char magic[4];
+        uint16 unk;
+        uint16 unk;
+        uint32 boneCount;
+        uint32 unk;
+        uint32 unk;
+        uint32 unk;
+        uint32 unk;
+    }header<bgcolor=cYellow>;
+
+    struct BONE{
+        char boneName[64];
+        uint32 boneType; //???
+        uint32 treeDepth;//???
+        uint32 boneID;
+    }bones[header.boneCount]<bgcolor=cRed>;
+
+    struct BONEDATA{
+        float posX;
+        float posY; 
+        float posZ;
+        float rotX;
+        float rotY;
+        float rotZ;
+        float scaleX;
+        float scaleY;
+        float scaleZ;
+    }bonedata[header.boneCount]<bgcolor=cBlue>;
+}file;

@@ -1,0 +1,46 @@
+//------------------------------------------------
+//--- 010 Editor v7.0 Binary Template
+//
+//      File: efc
+//   Authors: Jam1garner
+//   Version: -
+//   Purpose: -
+//  Category: -
+// File Mask: -
+//  ID Bytes: -
+//   History: -
+//------------------------------------------------
+
+struct FILE{
+    struct HEADER{
+        char magic[4];
+        uint32 uknown;
+        uint16 dataCount;
+        uint16 stringCount;
+        uint32 unknown;
+    }header<bgcolor=cYellow>;
+    struct DATA{
+            uint32 unknown;
+            uint32 unknown;
+            uint32 unknown;
+            uint32 unknown;
+    }data[header.dataCount]<bgcolor=cLtBlue>;
+    
+    local int i,j;
+    
+
+    struct STRINGBANK{
+        for(j=0;j<header.stringCount;j++){
+            i = 0;
+            while(ReadByte(FTell()+i)!=0)
+                i++;
+            
+            struct STR{
+                char chr[i];
+            }str;
+            FSeek(FTell()+1);
+        }
+    }stringBank<bgcolor=cRed>;
+
+    
+}file;

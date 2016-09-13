@@ -1,0 +1,33 @@
+//------------------------------------------------
+//--- 010 Editor v7.0 Binary Template
+//
+//      File: OMO
+//   Authors: Jam1garner
+//   Version: -
+//   Purpose: Bone animation
+//  Category: Animation
+//  ID Bytes: 4F 4D 4F 20
+//------------------------------------------------
+
+struct FILE{
+    struct HEADER{
+        char magic[4]; //"OMO "
+        uint16 unk;
+        uint16 unk;
+        uint32 unk;
+        uint16 unk;
+        uint16 tableEntryCount;
+        uint16 frameCount;
+        uint16 frameSize;
+        uint32 tableOffset;
+        uint32 dataOffset;
+        uint32 frameDataOffset;
+        FSeek(tableOffset);
+        struct TABLENTRY{
+            uint32 animType;
+            uint32 boneId;
+            uint32 offsetInData;
+            uint32 offsetInFrame;
+        }table[tableEntryCount]<bgcolor=cLtBlue>;
+    }header<bgcolor=cYellow>;
+}file;

@@ -5,10 +5,8 @@
 //   Authors: Jam1garner
 //   Version: -
 //   Purpose: -
-//  Category: -
-// File Mask: -
-//  ID Bytes: -
-//   History: -
+//  Category: Effect Table?
+//  ID Bytes: 45 46 43 46
 //------------------------------------------------
 
 struct FILE{

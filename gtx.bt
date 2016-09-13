@@ -1,14 +1,12 @@
 //------------------------------------------------
 //--- 010 Editor v7.0.2 Binary Template
 //
-//      File: 
-//   Authors: 
+//      File: GTX
+//   Authors: Zarklord
 //   Version: 
-//   Purpose: 
-//  Category: 
-// File Mask: 
-//  ID Bytes: 
-//   History: 
+//   Purpose: Texture Data
+//  Category: Textures
+//  ID Bytes: 47 66 78 32
 //------------------------------------------------
 local int lastBLK = 0;
 

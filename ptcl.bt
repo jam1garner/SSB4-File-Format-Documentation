@@ -1,0 +1,156 @@
+//------------------------------------------------
+//--- 010 Editor v7.0.2 Binary Template
+//
+//      File: ptcl
+//   Authors: Zarklord & Jam1garner
+//   Version: 
+//   Purpose: 
+//  Category: 
+// File Mask: 
+//  ID Bytes: 
+//   History: 
+//------------------------------------------------
+struct FILE{
+    struct HEADER{
+        char magic[4];
+        uint32 headerSize;
+        uint32 numOfPtcStrings;
+        uint32 padding;
+        uint32 ptcStringStart;
+        uint32 unknownValueOffset;
+        uint32 unknownValueOffsetLength;
+        uint32 gtxStart;
+        uint32 gtxSectionSize;
+        uint32 unknownValueOffset;
+        uint32 unknownValueOffsetLength;
+        uint32 unknownValueOffset;
+        uint32 unknownValueOffsetLength;
+        uint32 unknownValueOffset;
+        uint32 unknownValueOffsetLength;
+    }header<bgcolor=cYellow>;
+
+    local int i;
+    local char charHeader[3];
+    local string stringHeader;
+    FSeek(header.ptcStringStart);
+    struct PTCCHARNAME{
+        SetBackColor(cDkPurple);
+        char charName[ReadStringLength(FTell(),-1) - 1];
+        SetBackColor(cNone);
+        FSkip(1);
+        for(i = 1;i <= header.numOfPtcStrings;i++) {
+            struct PTCSTRING{
+                SetBackColor(cPurple);
+                char PtcString[ReadStringLength(FTell(),-1) - 1];
+                SetBackColor(cNone);
+                FSkip(1);
+                while(ReadByte(FTell()) != 0) {
+                    ReadBytes(charHeader, FTell(), 3);
+                    stringHeader = charHeader;
+                    if(stringHeader != "Ptc") {
+                        struct PTCSUBSTRING{
+                            SetBackColor(cLtPurple);
+                            char PtcSubString[ReadStringLength(FTell(),-1) - 1];
+                            SetBackColor(cNone);
+                            FSkip(1);
+                        }ptcsubstring;
+                    } else {
+                        break;
+                    }
+                }
+            }ptcstring;
+        }
+        //move to the end of the line
+        //as no matter what it is padded
+        FSeek(((FTell() / 16) + 1) * 16);
+    }ptcharname;
+
+    FSeek(header.unknownValueOffset[0]);
+    struct UNKNOWNVALUE1{
+        byte unknown[header.unknownValueOffsetLength[0]];
+    }unknownvalue1<bgcolor=cDkAqua>;
+
+    FSeek(header.gtxStart);
+    local int lastBLK = 'F';
+    struct GTXSECTION{
+        uint32 unknown;
+        uint32 extradatalength;
+        uint32 thisdatasize;
+        uint32 lastlinebeforegtxoffset;
+        uint32 beforegtxoffset;
+        uint32 gtxsectionlength;
+        FSeek(header.gtxStart);
+        FSkip(beforegtxoffset);
+        while(FTell() < header.gtxStart + gtxsectionlength) {
+            lastBLK = 'F';
+            struct DATABLK (uint32 size) {
+                if(size == 156) {
+                    uint32 dimension;
+                    uint32 textureWidth;
+                    uint32 textureHeight;
+                    uint32 depth;
+                    uint32 numOfMips;
+                    uint32 texFormat;
+                    uint32 aaMode;
+                    uint32 dataLength;
+                    uint32 dataPointer;
+                    uint32 mipsDataLength;
+                    uint32 mipsPointer;
+                    uint32 tileMode;
+                    uint32 swizzleVal;
+                    uint32 alignment;
+                    uint32 pitch;
+                    uint32 unknown[92 / 4];
+                } else {
+                    uint32 unknown[size / 4];
+                }
+            };
+            struct GTXHEADER{
+                char magic[4];
+                uint32 headerSize;
+                uint32 majorVerNum;
+                uint32 minorVerNum;
+                uint32 gpuVer;
+                uint32 alignMode;
+                uint32 padding;
+                uint32 padding;
+                while(lastBLK == 'F') {
+                    struct BLKHEADER{
+                        char magic[4];
+                        uint32 headerSize;
+                        uint32 majorVerNum;
+                        uint32 minorVerNum;
+                        uint32 blockType;
+                        uint32 followDataSize;
+                        uint32 uniqueBlockIdentifier;
+                        uint32 incrementIndex;
+                        if(blockType != 1) {
+                            SetBackColor(cAqua);
+                            DATABLK dataBLK(followDataSize);
+                            SetBackColor(cNone);
+                        }
+                        if(blockType == 1) {
+                            lastBLK = 'T';
+                        }
+                    }blkheader<bgcolor=cGreen>;
+                }
+            }gtxheader<bgcolor=cYellow>;       
+        } 
+    }gtxsection;
+
+    FSeek(header.unknownValueOffset[1]);
+    struct UNKNOWNVALUE2{
+        byte unknown[header.unknownValueOffsetLength[1]];
+    }unknownvalue2<bgcolor=cLtAqua>;
+
+    FSeek(header.unknownValueOffset[2]);
+    struct UNKNOWNVALUE3{
+        byte unknown[header.unknownValueOffsetLength[2]];
+    }unknownvalue3<bgcolor=cAqua>;
+
+    FSeek(header.unknownValueOffset[3]);
+    struct UNKNOWNVALUE4{
+        byte unknown[header.unknownValueOffsetLength[3]];
+    }unknownvalue4<bgcolor=cSilver>;
+}file;
+    

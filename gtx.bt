@@ -1,0 +1,70 @@
+//------------------------------------------------
+//--- 010 Editor v7.0.2 Binary Template
+//
+//      File: 
+//   Authors: 
+//   Version: 
+//   Purpose: 
+//  Category: 
+// File Mask: 
+//  ID Bytes: 
+//   History: 
+//------------------------------------------------
+local int lastBLK = 0;
+
+struct FILE{
+    struct DATABLK (uint32 size) {
+        if(size == 156) {
+            uint32 dimension;
+            uint32 textureWidth;
+            uint32 textureHeight;
+            uint32 depth;
+            uint32 numOfMips;
+            uint32 texFormat;
+            uint32 aaMode;
+            uint32 dataLength;
+            uint32 dataPointer;
+            uint32 mipsDataLength;
+            uint32 mipsPointer;
+            uint32 tileMode;
+            uint32 swizzleVal;
+            uint32 alignment;
+            uint32 pitch;
+            byte unknown[92];
+        } else {
+            byte unknown[size];
+        }
+    };
+    struct HEADER{
+        char magic[4];
+        uint32 headerSize;
+        uint32 majorVerNum;
+        uint32 minorVerNum;
+        uint32 gpuVer;
+        uint32 alignMode;
+        uint32 padding;
+        uint32 padding;
+    }header<bgcolor=cYellow>;
+    while(lastBLK == 0) {
+        struct BLKHEADER{
+            char magic[4];
+            uint32 headerSize;
+            uint32 majorVerNum;
+            uint32 minorVerNum;
+            uint32 blockType;
+            uint32 followDataSize;
+            uint32 uniqueBlockIdentifier;
+            uint32 incrementIndex;
+            if(blockType != 1) {
+                SetBackColor(cAqua);
+                DATABLK dtBLK(followDataSize);
+                SetBackColor(cNone);
+            }
+            if(blockType == 1) {
+                lastBLK = 1;
+            }
+        }blkheader<bgcolor=cGreen>;
+    }
+
+}file;
+

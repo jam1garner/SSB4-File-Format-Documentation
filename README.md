@@ -1,8 +1,14 @@
 # SSB4-File-Format-Documentation
 
 ## Included file formats:
+-GTX: image files
+    Status: Basic Data.
+
+-PTCL: Particle File?
+    Status: Header Data + Sections Size Defined.
+
 -VBN: bonesets
-    Status: Completed.
+    Status: Completed(Figured out more header data.).
 
 -MTA: Material Animation
     Status: Completed.

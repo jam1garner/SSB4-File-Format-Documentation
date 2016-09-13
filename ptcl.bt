@@ -5,10 +5,8 @@
 //   Authors: Zarklord & Jam1garner
 //   Version: 
 //   Purpose: 
-//  Category: 
-// File Mask: 
-//  ID Bytes: 
-//   History: 
+//  Category: Particle Data?
+//  ID Bytes: 45 46 54 46
 //------------------------------------------------
 struct FILE{
     struct HEADER{

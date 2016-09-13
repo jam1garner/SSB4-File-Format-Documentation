@@ -15,10 +15,7 @@ struct FILE{
         uint16 unk;
         uint16 unk;
         uint32 totalBoneCount;
-        uint32 normalBoneCount;
-        uint32 unk;
-        uint32 HLPBoneCount;
-        uint32 SWGBoneCount;
+        uint32 boneCount[4];
     }header<bgcolor=cYellow>;
 
     struct BONE{   
@@ -26,12 +23,7 @@ struct FILE{
         uint32 boneType; //???
         uint32 treeDepth;//???
         uint32 boneID;
-    };
-    struct BONES{
-        BONE normalbones[header.normalBoneCount];
-        BONE HLPbones[header.HLPBoneCount];
-        BONE SWGbones[header.SWGBoneCount];
-    }bones<bgcolor=cRed>;
+    }bones[header.totalBoneCount]<bgcolor=cRed>;
     struct BONEDATA{
         float posX;
         float posY; 
@@ -42,10 +34,5 @@ struct FILE{
         float scaleX;
         float scaleY;
         float scaleZ;
-    };
-    struct BONESDATA{
-        BONEDATA normalBonesData[header.normalBoneCount];
-        BONEDATA HLPBonesData[header.HLPBoneCount];
-        BONEDATA SWGBonesData[header.SWGBoneCount];
-    }bonesdata<bgcolor=cBlue>;
+    }bonedata[header.totalBoneCount]<bgcolor=cBlue>;
 }file;

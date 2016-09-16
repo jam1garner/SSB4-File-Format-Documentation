@@ -15,30 +15,33 @@ struct FILE{
         uint32 uknown;
         uint16 dataCount;
         uint16 stringCount;
-        uint32 unknown;
+        uint16 slotSpecificDataPtcCount;
+        uint16 padding;
     }header<bgcolor=cYellow>;
     struct DATA{
             uint32 unknown;
-            uint32 unknown;
-            uint32 unknown;
-            uint32 unknown;
+            uint32 PtcStringsSlot;
+            uint32 stringBankSlot;
+            uint32 slotSpecifDataPtc;
     }data[header.dataCount]<bgcolor=cLtBlue>;
     
-    local int i,j;
+    struct SLOTDATABANK{
+        uint16 slotData[2];
+    }slotDataBank[header.slotSpecificDataPtcCount]<bgcolor=0xBF3FBF>;
     
 
     struct STRINGBANK{
-        for(j=0;j<header.stringCount;j++){
-            i = 0;
-            while(ReadByte(FTell()+i)!=0)
-                i++;
-            
-            struct STR{
-                char chr[i];
-            }str;
-            FSeek(FTell()+1);
+        struct NRMSTR{
+            char chr[ReadStringLength(FTell(),-1) - 1];
+            FSkip(1);
+        }nrmStr[header.stringCount]<bgcolor=cRed,optimize=false>;
+        if(header.slotSpecificDataPtcCount > 0) {
+            struct ODDSTR{
+                char chr[ReadStringLength(FTell(),-1) - 1];
+                FSkip(1);
+            }oddStr[header.slotSpecificDataPtcCount]<bgcolor=cPurple,optimize=false>;
         }
-    }stringBank<bgcolor=cRed>;
+    }stringBank;
 
     
 }file;

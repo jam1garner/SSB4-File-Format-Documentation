@@ -9,7 +9,7 @@
 //  ID Bytes: 47 66 78 32
 //------------------------------------------------
 local int lastBLK = 0;
-
+BigEndian();
 struct FILE{
     struct DATABLK (uint32 size) {
         if(size == 156) {

@@ -8,7 +8,7 @@
 //  Category: Animation
 //  ID Bytes: 00 00 FE FF 50 41 54 48 00 00 00 00
 //------------------------------------------------
-
+BigEndian();
 struct FILE{
     char magic[0xC]<bgcolor=cYellow>;
     uint32 frameCount<bgcolor=cRed>;

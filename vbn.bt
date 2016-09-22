@@ -8,7 +8,7 @@
 //  Category: Model/Bones
 //  ID Bytes: 20 4E 42 56
 //------------------------------------------------
-
+LittleEndian();
 struct FILE{
     struct HEADER{
         char magic[4];

@@ -8,7 +8,7 @@
 //  Category: Effect Table?
 //  ID Bytes: 45 46 43 46
 //------------------------------------------------
-
+BigEndian();
 struct FILE{
     struct HEADER{
         char magic[4];

@@ -8,6 +8,7 @@
 //  Category: Particle Data?
 //  ID Bytes: 45 46 54 46
 //------------------------------------------------
+BigEndian();
 struct FILE{
     struct HEADER{
         char magic[4];
@@ -30,6 +31,7 @@ struct FILE{
     local int i;
     local char charHeader[3];
     local string stringHeader;
+    local int numOfSubstrings = 0;
     FSeek(header.ptcStringStart);
     struct PTCCHARNAME{
         SetBackColor(cDkPurple);
@@ -49,6 +51,7 @@ struct FILE{
                         struct PTCSUBSTRING{
                             SetBackColor(cLtPurple);
                             char PtcSubString[ReadStringLength(FTell(),-1) - 1];
+                            numOfSubstrings++;
                             SetBackColor(cNone);
                             FSkip(1);
                         }ptcsubstring;
@@ -62,7 +65,7 @@ struct FILE{
         //as no matter what it is padded
         FSeek(((FTell() / 16) + 1) * 16);
     }ptcharname;
-
+    Printf("%i", numOfSubstrings);
     FSeek(header.unknownValueOffset[0]);
     struct UNKNOWNVALUE1{
         byte unknown[header.unknownValueOffsetLength[0]];

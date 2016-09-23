@@ -12,14 +12,14 @@ BigEndian();
 struct FILE{
     struct HEADER{
         char magic[4];
-        uint32 uknown;
+        uint32 magic;
         uint16 dataCount;
         uint16 stringCount;
         uint16 slotSpecificDataPtcCount;
         uint16 padding;
     }header<bgcolor=cYellow>;
     struct DATA{
-            uint32 unknown;
+            uint32 ActiveTime; //?
             uint32 PtcStringsSlot;
             uint32 stringBankSlot;
             uint32 slotSpecifDataPtc;

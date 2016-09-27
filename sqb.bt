@@ -1,0 +1,17 @@
+//------------------------------------------------
+//--- 010 Editor v7.0.2 Binary Template
+//
+//      File: sgb
+//   Authors: Zarklord
+//   Version: 
+//   Purpose: Sound Sequence Control
+//  Category: Sound
+//  ID Bytes: 53 51 42 00
+//------------------------------------------------
+LittleEndian();
+struct FILE{
+    struct HEADER{
+        char magic[4];
+        uint16 magic;
+    }header<bgcolor=cYellow>;
+}file;

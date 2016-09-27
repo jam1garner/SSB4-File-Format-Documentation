@@ -1,0 +1,68 @@
+//------------------------------------------------
+//--- 010 Editor v7.0.2 Binary Template
+//
+//      File: .moi
+//   Authors: Zarklord
+//   Version: 
+//  Category: Model Visibility?
+//  ID Bytes:  NONE
+//------------------------------------------------
+BigEndian();
+local int i;
+struct FILE{
+    struct HEADER{
+        uint32 sectionDataCount1;
+        uint32 sectionDataCount2;
+        uint32 headerLength <comment="always 0x30">;
+        uint32 sectionDataSize1 <comment="always 0x20">;
+        uint32 sectionDataSize2 <comment="always 0x8">;
+        uint32 sectionDataStartPoint1 <comment="always 0x30">;
+        uint32 sectionDataStartPoint2;
+        uint32 padding[5];
+    }header<bgcolor=cYellow>;
+
+
+    FSeek(header.sectionDataStartPoint1);
+    struct SECTION1{
+        struct SECTION1DATA{
+            uint32 unk[header.sectionDataSize1 / 4];
+        }Section1Data[header.sectionDataCount1]<bgcolor=cRed>;
+        if(FTell() % 16 != 0) {
+            FSkip(((FTell() % 16) - 16) * -1);
+        }
+        struct SECTION1STRINGS{
+            for(i = 0;i<header.sectionDataCount1;i++){
+                struct STRINGS1{
+                    char ModelName[ReadStringLength(FTell(),-1) - 1];
+                }Strings1;
+                while(ReadByte(FTell()) == 0 && FTell() < header.sectionDataStartPoint2) {
+                    FSkip(1);
+                }
+            }
+        }section1strings<bgcolor=cPurple>;
+    }section1;
+
+
+    FSeek(header.sectionDataStartPoint2);
+    struct SECTION2{
+        struct SECTION2DATA{
+            uint32 someID;
+            ushort unk;
+            ushort id <comment="starts at 1 and counts up throught the model. sometimes the value is FF.">;
+        }Section2Data[header.sectionDataCount2]<bgcolor=cBlue>;
+        if(FTell() % 16 != 0) {
+            FSkip(((FTell() % 16) - 16) * -1);
+        }
+        struct SECTION2STRINGS{
+            for(i = 0;i<header.sectionDataCount2;i++){
+                struct STRINGS2{
+                    char ModelName[ReadStringLength(FTell(),-1) - 1];
+                }Strings2;
+                while(FTell() < FileSize() && ReadByte(FTell()) == 0) {
+                    FSkip(1);
+                }
+            }
+        }section2strings<bgcolor=cGreen>;
+    }section2;
+
+}file;

@@ -8,6 +8,7 @@
 //  Category: Animation
 //  ID Bytes: 4D 54 41 34
 //------------------------------------------------
+BigEndian();
 struct FILE{
     struct HEADER{
         char magic[4]; //MTA4

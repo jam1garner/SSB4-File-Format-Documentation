@@ -8,7 +8,7 @@
     Status: Header Data + Sections Size Defined.
 
 -VBN: bonesets,
-    Status: Completed(Figured out more header data.).
+    Status: Completed.
 
 -MTA: Material Animation,
     Status: Completed.
@@ -19,8 +19,11 @@
 -path.bin: Stage camera animation,
     Status: Completed.
 
--EFC: Effect infotable...?,
-    Status: Partially working.
+-EFC: Effect infotable,
+    Status: Mostly working.
+
+-MOI: Model Order Index?, 
+    Status: Most Sections Known(Some Data Inside Isn't).
 
 Feel free to commit new file types or improvements upon existing BTs
 *.BT is a binary template file format for use with 010 editor

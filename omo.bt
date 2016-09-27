@@ -8,7 +8,7 @@
 //  Category: Animation
 //  ID Bytes: 4F 4D 4F 20
 //------------------------------------------------
-
+BigEndian();
 struct FILE{
     struct HEADER{
         char magic[4]; //"OMO "

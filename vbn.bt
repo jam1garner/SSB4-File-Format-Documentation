@@ -8,10 +8,14 @@
 //  Category: Model/Bones
 //  ID Bytes: 20 4E 42 56
 //------------------------------------------------
-LittleEndian();
 struct FILE{
     struct HEADER{
         char magic[4];
+        if(magic == " NBV") {
+            LittleEndian();
+        } else if(magic == "VBN ") {
+            BigEndian();
+        }
         uint16 unk;
         uint16 unk;
         uint32 totalBoneCount;

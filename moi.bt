@@ -24,12 +24,14 @@ struct FILE{
 
     FSeek(header.sectionDataStartPoint1);
     struct SECTION1{
+
         struct SECTION1DATA{
             uint32 unk[header.sectionDataSize1 / 4];
         }Section1Data[header.sectionDataCount1]<bgcolor=cRed>;
         if(FTell() % 16 != 0) {
             FSkip(((FTell() % 16) - 16) * -1);
         }
+
         struct SECTION1STRINGS{
             for(i = 0;i<header.sectionDataCount1;i++){
                 struct STRINGS1{
@@ -40,11 +42,13 @@ struct FILE{
                 }
             }
         }section1strings<bgcolor=cPurple>;
+
     }section1;
 
 
     FSeek(header.sectionDataStartPoint2);
     struct SECTION2{
+
         struct SECTION2DATA{
             uint32 someID;
             ushort unk;
@@ -53,6 +57,7 @@ struct FILE{
         if(FTell() % 16 != 0) {
             FSkip(((FTell() % 16) - 16) * -1);
         }
+
         struct SECTION2STRINGS{
             for(i = 0;i<header.sectionDataCount2;i++){
                 struct STRINGS2{
@@ -63,6 +68,7 @@ struct FILE{
                 }
             }
         }section2strings<bgcolor=cGreen>;
+
     }section2;
 
 }file;

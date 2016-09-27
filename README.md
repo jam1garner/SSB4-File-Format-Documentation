@@ -25,6 +25,9 @@
 -MOI: Model Order Index?, 
     Status: Most Sections Known(Some Data Inside Isn't).
 
+-MTB: Sound Bank InfoTable, 
+    Status: Completed.
+
 Feel free to commit new file types or improvements upon existing BTs
 *.BT is a binary template file format for use with 010 editor
 However it also serves as a decent documentation format.

@@ -2,10 +2,10 @@
 //--- 010 Editor v7.0 Binary Template
 //
 //      File: efc
-//   Authors: Jam1garner
+//   Authors: Jam1garner & Zarklord
 //   Version: -
 //   Purpose: -
-//  Category: Effect Table?
+//  Category: Effect Table
 //  ID Bytes: 45 46 43 46
 //------------------------------------------------
 BigEndian();

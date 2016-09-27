@@ -1,0 +1,41 @@
+//------------------------------------------------
+//--- 010 Editor v7.0.2 Binary Template
+//
+//      File: mtb
+//   Authors: Zarklord
+//   Purpose: Sound Bank List
+//  Category: Sounds
+//  ID Bytes: 4D 54 42 00
+//------------------------------------------------
+LittleEndian();
+local int i, j;
+local uint32 correctOffsetStart;
+struct FILE{
+    struct HEADER{
+        char magic[4];
+        uint32 magic;
+        uint32 numOfEntries;
+        uint32 offsetStart;
+        correctOffsetStart = offsetStart + 0x10;
+    }header<bgcolor=cYellow>;
+    struct OFFSETTABLE{
+        while(FTell() < correctOffsetStart) {
+            uint32 offsetEntry;
+        }
+    }offsetTable<bgcolor=cBlue>;
+    struct ENTRIES{
+        for(i = 0;i<header.numOfEntries;i++) {
+            FSeek(correctOffsetStart + offsetTable.offsetEntry[i]);
+            struct ENTRY{
+                char chr[ReadStringLength(FTell(),-1) - 1];
+                FSeek(correctOffsetStart + offsetTable.offsetEntry[i] + 0x10);
+                uint32 defaultInternalID;
+                short nusType;
+                short nusCount;
+                for(j=0;j<nusCount;j++) {
+                    uint32 internalID;
+                }
+            }entry<bgcolor=cPurple>;
+        }
+    }entries;
+}file;

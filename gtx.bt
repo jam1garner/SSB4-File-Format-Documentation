@@ -28,7 +28,7 @@ struct FILE{
             uint32 swizzleVal;
             uint32 alignment;
             uint32 pitch;
-            byte unknown[92];
+            byte unknown[96];
         } else {
             byte unknown[size];
         }

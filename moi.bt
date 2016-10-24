@@ -26,7 +26,14 @@ struct FILE{
     struct SECTION1{
 
         struct SECTION1DATA{
-            uint32 unk[header.sectionDataSize1 / 4];
+            uint32 nameStart;
+            uint32 unk;
+            uint32 unk <comment="either 0x0 or 0x1">;
+            uint32 bindType;
+            uint32 ID;
+            uint32 padding;
+            uint32 padding;
+            uint32 padding;
         }Section1Data[header.sectionDataCount1]<bgcolor=cRed>;
         if(FTell() % 16 != 0) {
             FSkip(((FTell() % 16) - 16) * -1);
@@ -50,9 +57,9 @@ struct FILE{
     struct SECTION2{
 
         struct SECTION2DATA{
-            uint32 someID;
+            uint32 nameStart;
             ushort unk;
-            ushort id <comment="starts at 1 and counts up throught the model. sometimes the value is FF.">;
+            ushort ID <comment="references id of previous section. FF is its a null reference.">;
         }Section2Data[header.sectionDataCount2]<bgcolor=cBlue>;
         if(FTell() % 16 != 0) {
             FSkip(((FTell() % 16) - 16) * -1);

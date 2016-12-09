@@ -1,0 +1,59 @@
+//------------------------------------------------
+//--- 010 Editor v7.0.2 Binary Template
+//
+//      File: nut
+//   Authors: Zarklord and smb123win64gb
+//   Version: 0.1
+//  Category: Textures
+//  ID Bytes: 4E 54 57 55 or 4E 54 50 33
+//------------------------------------------------
+local int i,temp;
+struct FILE{
+    struct HEADER{
+        char magic[4];
+        uint16 version;
+        uint16 totalFiles;
+        FSkip(8);
+    }header<bgcolor=cYellow>;
+    struct IMAGEDATAS{
+        for(i=0;i<header.totalFiles;i++) {
+            struct IMAGEDATA{
+                uint32 completeSize;
+                FSkip(4);
+                uint32 size;
+                uint16 headerSize;
+                FSkip(2);
+                uint16 mipsFlag;
+                uint16 gfxFormat;
+                if(header.magic=="NTWU"){
+                    uint16 width;
+                    uint16 hight;
+                } else if(header.magic=="NTP3"){
+                    ubyte width2;
+                    ubyte width1;
+                    ubyte hight2;
+                    ubyte hight1;
+                
+                }
+                uint32 numOfMips;
+                FSkip(4);
+                uint32 offset1;
+                uint32 offset2;
+                uint32 offset3;
+                FSkip(4);
+                uint32 mipSize[(headerSize-0x50)/4];
+                uint32 eXt;
+                uint32 Ox20;
+                uint32 Ox10;
+                FSkip(4);
+                uint32 GIDX;
+                uint32 Ox10;
+                ubyte baseID;
+                ubyte groupID;
+                ubyte subgroupID;
+                ubyte offsetID;
+                FSkip(4);
+            }imagedata<optimize=false>;
+        }
+    }imagedatas<bgcolor=cPurple>;
+}file;

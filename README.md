@@ -27,6 +27,9 @@
 
 -MTB: Sound Bank InfoTable, 
     Status: Completed.
+    
+-ATKD: AI Attack Data
+    Status: Completed.
 
 Feel free to commit new file types or improvements upon existing BTs
 *.BT is a binary template file format for use with 010 editor

@@ -1,0 +1,31 @@
+//------------------------------------------------
+//--- 010 Editor v7.0.2 Binary Template
+//
+//      File: Smash 4 AI Attack Data
+//   Authors: Jam1garner
+//   Version: 1.0
+//   Purpose: AI
+//  Category: 
+// File Mask: 
+//  ID Bytes: ATKD
+//   History: 
+//------------------------------------------------
+
+BigEndian();
+struct HEADER{
+    char magic[4];
+    int entryCount;
+    int unk1;
+    int unk2;
+}header<bgcolor=cGreen>;
+
+struct ENTRY{
+    ushort attackId;
+    ushort unk; //may be bone index? (according to KingClubber)
+    ushort start;
+    ushort end;
+    float xmin;
+    float xmax;
+    float ymin;
+    float ymax;
+}entries[header.entryCount]<bgcolor=cPurple>;

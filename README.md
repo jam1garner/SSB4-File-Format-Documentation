@@ -31,6 +31,9 @@
 -ATKD: AI Attack Data
     Status: Completed.
 
+-MSCSB: MotionScript Binary, main character scripts
+    Status: Mostly laid out. (One header unk + scripts aren't highlighted)
+
 Feel free to commit new file types or improvements upon existing BTs
 *.BT is a binary template file format for use with 010 editor
 However it also serves as a decent documentation format.

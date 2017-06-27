@@ -1,0 +1,34 @@
+//------------------------------------------------
+//--- 010 Editor v7.0 Binary Template
+//
+//      File: 
+//   Authors: 
+//   Version: 
+//   Purpose: 
+//  Category: 
+// File Mask: 
+//  ID Bytes: 
+//   History: 
+//------------------------------------------------
+LittleEndian();
+
+struct HEADER{
+    char magic[0x10];
+    int entriesOffset<format=hex>;
+    int entryPoint<format=hex>;
+    int entryCount;
+    int unk;
+    int stringSize<format=hex>;
+    int stringCount;
+    int padding[3];
+}header<bgcolor=cRed>;
+
+FSeek(header.entriesOffset+0x30);
+FSeek((0x10 - (FTell() % 0x10)) + FTell());
+int scriptOffset[header.entryCount]<format=hex,bgcolor=cLtBlue>;
+
+FSeek((0x10 - (FTell() % 0x10)) + FTell());
+
+struct MSCSTRING{
+    char str[header.stringSize]<bgcolor=cGreen>;
+}strings[header.stringCount];

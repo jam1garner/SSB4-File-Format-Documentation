@@ -2,32 +2,246 @@
 //--- 010 Editor v7.0 Binary Template
 //
 //      File: OMO
-//   Authors: Jam1garner
+//   Authors: Jam1garner, Struz
 //   Version: -
 //   Purpose: Bone animation
 //  Category: Animation
 //  ID Bytes: 4F 4D 4F 20
 //------------------------------------------------
 BigEndian();
+
+
+typedef struct (int globalInterOffset){
+    byte   flags;              // which of trans, scale and rot are stored
+    byte   tFlag;              // trans data type
+    byte   rFlag;              // rot data type
+    byte   sFlag;              // scale data type
+    int32 boneHash <format=hex>;
+    uint32 interOffset;       // interpolation offset - where the values to multiply by the keyframe values are found
+    uint32 keyOffset;         // keyframe offset - where the keyframe values for this bone are found (within the keyframe)
+    
+    // Derived - make sure to enable showing local variables
+    local byte hasTrans = flags & 0x1;  // hasPos
+    local byte hasRot;
+    //Printf("%d", flags);
+    hasRot = flags & 0x2;
+    local byte hasScale = flags & 0x4;
+
+    local int64 tempPos = FTell();
+    FSeek(interOffset + globalInterOffset);  // seek to the node data
+    local int posType1 = -2;
+    local int rotType1 = -2;
+    local int scaType1 = -2;
+    if (hasTrans) {
+        local string posType;
+        if ((tFlag & 0x20) == 0x20) {
+            posType = "Constant";
+            posType1 = 1;
+            float pos_min_x;
+            float pos_min_y;
+            float pos_min_z;
+        } else if ((tFlag & 0x8) == 0x8) {
+            posType = "Interpolated";
+            posType1 = 0;
+            float pos_min_x;
+            float pos_min_y;
+            float pos_min_z;
+
+            float pos_max_x;
+            float pos_max_y;
+            float pos_max_z;
+        } else {
+            posType = "UNKNOWN";
+            posType1 = -1;
+        }
+    }
+    if (hasRot) {
+        local string rotType;
+        Printf("%X %X\n", rFlag, rFlag & 0xF0);
+        if ((rFlag & 0xF0) == 0x70) {
+            rotType = "Constant";
+            rotType1 = 3;
+            float rot_min_x;
+            float rot_min_y;
+            float rot_min_z;
+            // this is a quaternion where W is calculated from x y and z
+        } else if ((rFlag & 0xF0) == 0x60) {
+            rotType = "FConstant";
+            rotType1 = 2;
+            float rot_min_x;
+            float rot_min_y;
+            float rot_min_z;
+            float rot_min_w;
+        } else if ((rFlag & 0xF0) == 0x50) {
+            rotType = "Interpolated";
+            rotType1 = 1;
+            float rot_min_x;
+            float rot_min_y;
+            float rot_min_z;
+
+            float rot_max_x;
+            float rot_max_y;
+            float rot_max_z;
+        } else if ((rFlag & 0xF0) == 0xA0) {
+            rotType = "Frame (UNKNOWN)";
+            rotType1 = 0;
+        } else {
+            rotType = "UNKNOWN";
+            rotType1 = -1;
+        }
+    }
+    if (hasScale) {
+        local string scaType;
+        if (sFlag & 0x80) {
+            scaType = "Interpolated";
+            scaType1 = 0;
+            float sca_min_x;
+            float sca_min_y;
+            float sca_min_z;
+            
+            float sca_max_x;
+            float sca_max_y;
+            float sca_max_z;
+        } else if ((rFlag & 0x2) == 0x2) {
+            scaType = "Constant1";
+            scaType1 = 1;
+            float sca_min_x;
+            float sca_min_y;
+            float sca_min_z;
+        } else if ((rFlag & 0x3) == 0x3) {
+            scaType = "Constant2";
+            scaType1 = 2;
+            float sca_min_x;
+            float sca_min_y;
+            float sca_min_z;
+        } else {
+            scaType = "UNKNOWN";
+            scaType1 = -1;
+        }
+    }
+    FSeek(tempPos); // go back
+}NODE <bgcolor=cAqua, read=NodeData>;
+
+
+typedef struct (uint16 boneCount, uint32 globalInterOffset){
+    local int m;
+    for(m=0;m < boneCount;m++) {
+        NODE node(globalInterOffset);
+    }
+}NODES;
+
+
+typedef struct {
+    ushort data;
+    local ushort used = 0;
+}KEYFRAME_DATA <read=KeyFrameData>;
+
+typedef struct (int frameSize){
+    // TODO: we need a way to see if all the data is actually being used though
+    KEYFRAME_DATA data[frameSize / 2];
+}KEYFRAME <bgcolor=cGreen>;
+
+
+string NodeData(NODE &t) {
+    string nodeData;
+    SPrintf(nodeData,
+        "hash=0x%08X   data=%s%s%s",
+        t.boneHash,
+        t.hasTrans > 0 ? "t" : "",
+        t.hasRot > 0 ? "r" : "",
+        t.hasScale > 0 ? "s" : ""
+    );
+    return nodeData;
+}
+
+string KeyFrameData(KEYFRAME_DATA &kfd) {
+    string keyframeData;
+    SPrintf(keyframeData,
+        "%s",
+        kfd.used == 0 ? "N" : "Y"
+    );
+    return keyframeData;
+}
+
+
 struct FILE{
     struct HEADER{
         char magic[4]; //"OMO "
-        uint16 unk;
-        uint16 unk;
-        uint32 unk;
-        uint16 unk;
-        uint16 tableEntryCount;
-        uint16 frameCount;
-        uint16 frameSize;
-        uint32 tableOffset;
-        uint32 dataOffset;
-        uint32 frameDataOffset;
-        FSeek(tableOffset);
-        struct TABLENTRY{
-            uint32 animType;
-            uint32 boneId;
-            uint32 offsetInData;
-            uint32 offsetInFrame;
-        }table[tableEntryCount]<bgcolor=cLtBlue>;
+        uint16 verHi;
+        uint16 verLow;
+        uint32 flags;
+        uint16 unk1;
+        uint16 boneCount;      // numOfBones in Forge
+        uint16 frameCount;     // frameSize in Forge
+        uint16 frameSize;      // frameStart in Forge, size of frame data structure
+        uint32 nodeOffset;     // offset1 in Forge
+        uint32 interOffset;    // offset2 in Forge
+        uint32 keyOffset;      // offset3 in Forge
     }header<bgcolor=cYellow>;
+
+    FSeek(header.nodeOffset);  // first we do nodes
+    NODES nodes(header.boneCount, header.interOffset)<bgcolor=cLtBlue>;
+    
+    FSeek(header.keyOffset);  // now we do keyframes
+    KEYFRAME keyframes(header.frameSize)[header.frameCount]<optimize=false>;
+
+    // Theorise about how data is used
+    local int i;
+    local int j;
+    local int shortPos;
+    for (i = 0; i < header.boneCount; i++) {
+        for (j = 0; j < header.frameCount; j++) {
+            // keyBase + (x / 2) + shortPos
+            shortPos = 0;
+            if (nodes.node[i].posType1 == 0) {
+                keyframes[j].data[shortPos].used = 1;
+                shortPos++;
+                keyframes[j].data[shortPos].used = 1;
+                shortPos++;
+                keyframes[j].data[shortPos].used = 1;
+                shortPos++;
+            }
+            if (nodes.node[i].posType1 == 1) {
+
+            }
+
+            
+            if (nodes.node[i].rotType1 == 0) {
+                // UNKNOWN TYPE
+                keyframes[j].data[shortPos].used = 1;
+                shortPos++;
+                keyframes[j].data[shortPos].used = 1;
+                shortPos++;
+                keyframes[j].data[shortPos].used = 1;
+                shortPos++;
+                keyframes[j].data[shortPos].used = 1;
+                shortPos++;
+            }
+            if (nodes.node[i].rotType1 == 1) {
+                keyframes[j].data[shortPos].used = 1;
+                shortPos++;
+                keyframes[j].data[shortPos].used = 1;
+                shortPos++;
+                keyframes[j].data[shortPos].used = 1;
+                shortPos++;
+            }
+            if (nodes.node[i].rotType1 == 2 || nodes.node[i].rotType1 == 3) {
+
+            }
+
+
+            if (nodes.node[i].scaType1 == 0) {
+                keyframes[j].data[shortPos].used = 1;
+                shortPos++;
+                keyframes[j].data[shortPos].used = 1;
+                shortPos++;
+                keyframes[j].data[shortPos].used = 1;
+                shortPos++;
+            }
+            if (nodes.node[i].scaType1 == 1) {
+
+            }
+        }
+        
+    }
 }file;

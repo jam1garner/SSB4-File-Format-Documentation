@@ -46,13 +46,13 @@ typedef struct (int faceStart,int faceAmount,int faceSize){
             short fc;
         }
     }
-}FACES <bgcolor=cDkPurple,optimize=false,size=calcFacesSize>;
+}FACES <bgcolor=cDkPurple,optimize=false>;
 
 int calcFacesSize(FACES &f){
     return faceAmountCalc*2;
 }
 
-typedef struct (int UVSize){
+typedef struct (int UVSize) {
     if(UVSize == 0x12 || UVSize == 0x22 || UVSize == 0x32 || UVSize == 0x42) {
         struct VERTCOLORS{
             ubyte colorR;
@@ -82,7 +82,7 @@ typedef struct (int UVSize){
         hfloat tu4;
         hfloat tv4;
     }
-}UVS <bgcolor=cAqua,size=calcUVSize>;
+}UVS <bgcolor=cAqua>;
 
 int calcUVSize(UVS &u) {
     length = 0;
@@ -123,7 +123,6 @@ typedef struct (int vertexAmount, int vertexStart, int vertexSize, int UVSize, i
                 hfloat ny;
                 hfloat nz;
                 hfloat nq;
-                UVS uvs;
             }vertSet6<bgcolor=cLtAqua,size=20>;
         } else if(vertexSize == 0x7) {
             struct VERTSET7(int UVSize){
@@ -419,7 +418,7 @@ typedef struct {
     FSkip(6);
 }TEXTURE <read=TextureID,bgcolor=cLtRed,optimize=true,size=0x18>;
 
-string TextureID(TEXTURE &t) {'
+string TextureID(TEXTURE &t) {
     string ID;
     SPrintf(ID, "%02x%02x%02x%02x",t.baseID,t.groupID,t.subgroupID,t.textureID);
     return "Texture ID: 0x"+ID;
@@ -533,6 +532,11 @@ string PolysetName(POLYSET &p) {
 
 typedef struct{
     char header[4];
+    if(header == "NDWD") {
+        LittleEndian();
+    } else if(header == "NDP3"){
+        BigEndian();
+    }
     uint32 fileSize;
     uint16 magic1;
     uint16 numOfPolys;

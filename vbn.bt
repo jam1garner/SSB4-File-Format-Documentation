@@ -28,7 +28,7 @@ struct FILE{
     struct BONE{   
         char boneName[64];
         uint32 boneType; //???
-        uint32 treeDepth;//???
+        uint32 parentIndex;//???
         uint32 boneHash;
     };
 

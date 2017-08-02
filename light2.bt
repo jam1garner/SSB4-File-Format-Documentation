@@ -1,0 +1,50 @@
+//-----------------------------------------------------\\
+//--- 010 Editor v8.0 Binary Template                  \\
+//                                                     \\
+//      File: LIGHT2.bin                               \\
+//   Authors: Demonslayerx8                            \\
+//   Version: 1.0                                      \\
+//   Purpose: Static Light/Sm4sh Research              \\
+//  Category: Stage Hemisphere Lighting                \\
+//      Note: Not to be mistaken with Char Hemisphere  \\
+//  ID Bytes: 4C 49 4t 48                              \\
+//-----------------------------------------------------\\
+BigEndian();
+    struct FILE{
+        struct HEADER{
+            char LIGH[4]; //LIGH
+        }header<bgcolor=cBlue>;
+
+        struct Sky{
+            uint32 Hemisphere1; //Sky Lighting
+        }sky<bgcolor=cYellow>;
+
+        struct Ground{
+            uint32 Hemisphere2; //Ground Lighting
+        }ground<bgcolor=cLtBlue>;
+
+        struct SkyLightingANGLE{
+            float XAngle;
+            float YAngle;
+            float ZAngle;
+        }lighSkyAngle<bgcolor=cRed>;
+
+        struct SkyLightingHSV{
+            float Hue;
+            float Saturation;
+            float Brightness;
+        }lighSkyHSV<bgcolor=cGreen>;
+
+        struct GroundLightingANGLE{
+            float XAngle;
+            float YAngle;
+            float ZAngle;
+        }lighGroundAngle<bgcolor=cRed>;
+
+        struct GroundLightingHSV{
+            float Hue;
+            float Saturation;
+            float Brightness;
+        }lighGroundHSV<bgcolor=cGreen>;
+
+}file;

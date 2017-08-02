@@ -1,0 +1,233 @@
+//------------------------------------------------
+//--- 010 Editor v7.0.2 Binary Template
+//
+//      File: LVD
+//   Authors: Demonslayerx8
+//   Version: 0.1
+//   Purpose: Collision/Misc Data in Smash 4
+//  Category: Stage Data
+//  ID Bytes: 4C 56 44 31
+//------------------------------------------------
+BigEndian();
+struct FILE{
+    struct HEADER{
+        FSkip(6);
+        char magic[4]; //LVD1
+    }header<bgcolor=cBlue>;
+
+    struct COL{
+        FSkip(1);
+        uint32 colCount;
+    }colCount<bgcolor=cLtGreen>;
+
+struct COLLISIONGROUPS{
+            FSkip(13);
+        struct COLNAME{
+            char colName[25];
+            FSkip(31);
+        }colName<bgcolor=cDkAqua>;
+
+        struct POLYNAME{
+            FSkip(1);
+            char polyName[27];
+            FSkip(37);
+        }polyName<bgcolor=cDkAqua>;
+
+        struct COLPOSI{
+            FSkip(1);
+            float values[1*3];
+        }colPosi<bgcolor=cLtBlue>;
+
+        struct FLAG1{
+            byte hasBone; //Flag
+            FSkip(1);
+        }flag1<bgcolor=cRed>;
+
+        struct Unk1{
+            float values[1];
+            FSkip(1);
+        }unk1<bgcolor=cYellow>;
+
+        struct Unk2{
+            float values[3];
+        }unk2<bgcolor=cYellow>;
+
+        struct BoneID{ //not sure
+            float values[1];
+        }boneID<bgcolor=cLtRed>;
+
+        struct BoneName{
+            FSkip(1);
+            char boneName[18];
+        }colName<bgcolor=cDkAqua>;
+
+        struct Unk3{
+            float values[12];
+            FSkip(-1);
+        }unk3<bgcolor=cYellow>;
+
+        struct FLAG2{
+            byte unknownFlag; //Flag
+            FSkip(1);
+        }flag2<bgcolor=cRed>;
+
+        struct Fallthrough{
+            byte hasFallthrough; //Flag
+            FSkip(1);
+        }FallthroughFlag<bgcolor=cRed>;
+
+        int vertcount<bgcolor=cLtGreen>;
+        struct Vertex{ 
+            FSkip(1);
+            float X;
+            float Y;
+        }vertices[vertcount]<bgcolor=cGreen,optimize=false>;
+
+            FSkip(1);
+        int passcount<bgcolor=cLtGreen>;
+        struct Pass{ 
+            FSkip(1);
+            float X;
+            float Y;
+        }passthrough[passcount]<bgcolor=cBlue,optimize=false>;
+            FSkip(1);
+
+        int cliffCount<bgcolor=cLtGreen>;
+        struct CLIFF{
+            //cliff stuff goes here
+            char data[0xFC];
+        }cliff[cliffCount]<bgcolor=cPurple>;
+            FSkip(1);
+
+        int matCount<bgcolor=cLtGreen>;
+        struct MATERIAL{
+                FSkip(1);
+                char data[0xC]<bgcolor=cAqua>;
+        }material[matCount]<optimize=false>;
+
+    }collisions[colCount.colCount]<bgcolor=cWhite,optimize=false>;
+
+        struct Entry{
+            FSkip(1);
+            uint32 entryCount;
+        }entryCount<bgcolor=cLtGreen>;
+
+struct SPAWNGROUPS{
+        struct STARTNAME{
+            FSkip(13);
+            char entryName[16];
+            FSkip(41);
+            char playerName[10]<bgcolor=cDkAqua>;
+            FSkip(55);
+            float unknownX<bgcolor=cYellow>;
+            float unknownY<bgcolor=cYellow>;
+            FSkip(93);
+            float EntryX<bgcolor=cGreen>;
+            float EntryY<bgcolor=cGreen>;
+        }entryName<bgcolor=cDkAqua>;
+
+    }entries[entryCount.entryCount]<bgcolor=cWhite,optimize=false>;
+
+        struct Restart{
+            FSkip(1);
+            uint32 respawnCount;
+        }respawnCount<bgcolor=cLtGreen>;
+
+struct RESTARTGROUPS{
+        struct RESTARTNAME{
+            FSkip(13);
+            char respawnName[18];
+            FSkip(39);
+            char playerName[10]<bgcolor=cDkAqua>;
+            FSkip(55);
+            float unknownX<bgcolor=cYellow>;
+            float unknownY<bgcolor=cYellow>;
+            FSkip(93);
+            float EntryX<bgcolor=cGreen>;
+            float EntryY<bgcolor=cGreen>;
+        }respawnName<bgcolor=cDkAqua>;
+
+    }restart[respawnCount.respawnCount]<bgcolor=cWhite,optimize=false>;
+
+        struct Camera{
+            FSkip(1);
+            uint32 camCount;
+        }camCount<bgcolor=cLtGreen>;
+
+struct CAMERAGROUPS{
+        struct CAMERANAME{
+            FSkip(13);
+            char camName[9];
+            FSkip(48);
+            char Name[4]<bgcolor=cDkAqua>;
+            FSkip(162);
+            float CameraLeftX<bgcolor=cGreen>;
+            float CameraRightX<bgcolor=cGreen>;
+            float CameraTopY<bgcolor=cGreen>;
+            float CameraBottomY<bgcolor=cGreen>;
+        }camName<bgcolor=cDkAqua>;
+
+    }camera[camCount.camCount]<bgcolor=cWhite,optimize=false>;
+
+        struct Death{
+            FSkip(1);
+            uint32 deathCount;
+        }deathCount<bgcolor=cLtGreen>;
+
+struct DEATHGROUPS{
+        struct DEATHNAME{
+            FSkip(13);
+            char deathName[9];
+            FSkip(48);
+            char Name[4]<bgcolor=cDkAqua>;
+            FSkip(162);
+            float DeathLeftX<bgcolor=cGreen>;
+            float DeathRightX<bgcolor=cGreen>;
+            float DeathTopY<bgcolor=cGreen>;
+            float DeathBottomY<bgcolor=cGreen>;
+        }deathName<bgcolor=cDkAqua>;
+
+    }death[deathCount.deathCount]<bgcolor=cWhite,optimize=false>;
+
+        struct Item{
+            FSkip(36);
+            uint32 popupCount;
+        }popupCount<bgcolor=cLtGreen>;
+
+struct ITEMENTRY{
+        struct ITEMNAME{
+            FSkip(13);
+            char itemName[31]<bgcolor=cDkAqua>;
+            FSkip(26);
+            char Name[22]<bgcolor=cDkAqua>;
+            FSkip(150);
+                struct ITEMPLANE{
+                int32 planeCount; //per plane stuff goes here
+
+             }itemPlanes[planeCount];
+
+        struct GeneralPoint{
+            FSkip(6);
+            int32 GeneralCount;
+            float PositionX<bgcolor=cGreen>;
+            float PositionY<bgcolor=cGreen>;
+        }GeneralCount<bgcolor=cLtGreen>;
+
+struct GENERALGROUPS{
+        struct POINTNAME{
+            FSkip(13);
+            char PointName[31];
+            FSkip(26);
+            char FinalSmashName[27];
+            FSkip(38);
+            float unknown<bgcolor=cYellow>;
+            float unknown<bgcolor=cYellow>;
+            FSkip(102);
+            float PositionX<bgcolor=cGreen>;
+            float PositionY<bgcolor=cGreen>;
+            FSkip(20);
+        }GeneralPointName<bgcolor=cDkAqua>;
+
+    }general[GeneralCount.GeneralCount]<bgcolor=cWhite,optimize=false>;
+
+}file;

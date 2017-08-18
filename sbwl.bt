@@ -1,0 +1,28 @@
+//-----------------------------------------------------\\
+//--- 010 Editor v8.0 Binary Template                  \\
+//                                                     \\
+//      File: model.sbwl                               \\
+//   Authors: Demonslayerx8                            \\
+//   Version: 1.0                                      \\
+//   Purpose: Swing Bone List                          \\
+//  Category: Swing Bone White List?                   \\
+//  ID Bytes: 53 42 57 4C                              \\
+//-----------------------------------------------------\\
+BigEndian();
+struct File{
+    struct HEADER{
+        char magic[4]; //"SBWL"
+        uint32 entriesCountPerBone<bgcolor=cGreen>;
+        uint32 tableCount<bgcolor=cPurple>;
+    }header<bgcolor=cYellow>;
+    
+    struct TABLENTRY{
+        uint32 TableHash;
+        uint32 entryCount<bgcolor=cBlue>;
+        struct BONESPAIR{
+            uint32 swingBoneID<bgcolor=cRed>;
+            float value;
+            uint32 normalBoneID;
+        }table[entryCount]<bgcolor=cSilver>;
+    }table[header.tableCount]<bgcolor=cAqua,optimize=false>;
+}file;

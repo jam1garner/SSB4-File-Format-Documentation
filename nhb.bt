@@ -1,0 +1,61 @@
+//-----------------------------------------------------\\
+//--- 010 Editor v8.0 Binary Template                  \\
+//                                                     \\
+//      File: model.nhb                                \\
+//   Authors: Demonslayerx8                            \\
+//   Version: 1.0                                      \\
+//   Purpose: Namco Helper Bone                        \\
+//  Category: Helper Bone Chart                        \\
+//  ID Bytes: 20 42 48 4E                              \\
+//-----------------------------------------------------\\
+LittleEndian();
+    struct FILE{
+        struct HEADER{
+            char  BHN[4]; // BHN
+        }header<bgcolor=cBlue>;
+
+        struct BoneCount{
+            uint32 Entries; //bone entries
+        }bones<bgcolor=cYellow>;
+
+        struct Unk1{
+            uint32 Unk;
+        }unk1<bgcolor=cRed>;
+
+        struct Unk2{
+            uint32 Unk;
+        }unk2<bgcolor=cRed>;
+
+        struct Unk3{
+            uint32 Unk;
+        }unk3<bgcolor=cRed>;
+
+        struct TableEntries{
+            uint32 Entries; //table count
+        }tableCount<bgcolor=cYellow>;
+
+        struct Unk4{
+            uint32 Unk;
+        }unk4<bgcolor=cRed>;
+
+        struct Unk5{
+            uint32 Unk;
+        }unk5<bgcolor=cRed>;
+
+        struct hashStartOffset{
+            uint32 offset;
+        }hashLocation<bgcolor=cLtGreen>;
+
+        struct Unk6{
+            uint32 Unk;
+        }unk6<bgcolor=cRed>;
+
+        struct hashLength{
+            uint32 hashLength;
+        }unk7<bgcolor=cYellow>;
+
+        struct Types{
+            uint32 boneTypes; //how many bone types there is
+        }type<bgcolor=cYellow>;
+
+}file;

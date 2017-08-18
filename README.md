@@ -39,6 +39,12 @@
     
 -Light2: Stage Hemisphere Lighting
     Status: Completed.
+	
+-NHB: Namco Helper Bones
+    Status: Header Data.
+	
+-SBWL: Swing Bone WhiteList
+    Status: Completed.
 
 Feel free to commit new file types or improvements upon existing BTs
 *.BT is a binary template file format for use with 010 editor

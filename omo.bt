@@ -8,6 +8,8 @@
 //  Category: Animation
 //  ID Bytes: 4F 4D 4F 20
 //------------------------------------------------
+// Note: The full details of how this works are hard to capture in this template.
+// Please see the Smash-Forge source for a better understanding.
 BigEndian();
 
 
@@ -23,7 +25,6 @@ typedef struct (int globalInterOffset){
     // Derived - make sure to enable showing local variables
     local byte hasTrans = flags & 0x1;  // hasPos
     local byte hasRot;
-    //Printf("%d", flags);
     hasRot = flags & 0x2;
     local byte hasScale = flags & 0x4;
 
@@ -34,13 +35,15 @@ typedef struct (int globalInterOffset){
     local int scaType1 = -2;
     if (hasTrans) {
         local string posType;
-        if ((tFlag & 0x20) == 0x20) {
+        // IDA style is (flags_as_word >> 18) & 0x3F
+        if ((tFlag & 0x20) == 0x20) { // 0x8 if we only consider the flag bits a la IDA
+            // This type of node has its data provided only in the node data (probably to prevent keyframe duplication)
             posType = "Constant";
             posType1 = 1;
             float pos_min_x;
             float pos_min_y;
             float pos_min_z;
-        } else if ((tFlag & 0x8) == 0x8) {
+        } else if ((tFlag & 0x8) == 0x8) {  // 0x2 if we only consider the flag bits a la IDA
             posType = "Interpolated";
             posType1 = 0;
             float pos_min_x;
@@ -50,6 +53,10 @@ typedef struct (int globalInterOffset){
             float pos_max_x;
             float pos_max_y;
             float pos_max_z;
+        } else if ((tFlag & 0x4) == 0x4) {  // 0x1 if we only consider the flag bits a la IDA
+            posType = "Keyframe";
+            posType1 = 2;
+            // This type of node has its vector3 provided in the keyframe data
         } else {
             posType = "UNKNOWN";
             posType1 = -1;
@@ -57,22 +64,23 @@ typedef struct (int globalInterOffset){
     }
     if (hasRot) {
         local string rotType;
+        // IDA style is (flags_as_word >> 12) & 0x3F
         Printf("%X %X\n", rFlag, rFlag & 0xF0);
-        if ((rFlag & 0xF0) == 0x70) {
+        if ((rFlag & 0xF0) == 0x70) { // 0x7 in IDA style
             rotType = "Constant";
             rotType1 = 3;
             float rot_min_x;
             float rot_min_y;
             float rot_min_z;
             // this is a quaternion where W is calculated from x y and z
-        } else if ((rFlag & 0xF0) == 0x60) {
-            rotType = "FConstant";
+        } else if ((rFlag & 0xF0) == 0x60) { // 0x6 in IDA style
+            rotType = "ConstantW";
             rotType1 = 2;
             float rot_min_x;
             float rot_min_y;
             float rot_min_z;
             float rot_min_w;
-        } else if ((rFlag & 0xF0) == 0x50) {
+        } else if ((rFlag & 0xF0) == 0x50) { // 0x5 in IDA style
             rotType = "Interpolated";
             rotType1 = 1;
             float rot_min_x;
@@ -82,8 +90,8 @@ typedef struct (int globalInterOffset){
             float rot_max_x;
             float rot_max_y;
             float rot_max_z;
-        } else if ((rFlag & 0xF0) == 0xA0) {
-            rotType = "Frame (UNKNOWN)";
+        } else if ((rFlag & 0xF0) == 0xA0) { // 0xA in IDA style
+            rotType = "Compressed";
             rotType1 = 0;
         } else {
             rotType = "UNKNOWN";
@@ -134,22 +142,29 @@ typedef struct (uint16 boneCount, uint32 globalInterOffset){
 typedef struct {
     ushort data;
     local ushort used = 0;
+    local string usedBy = "";
 }KEYFRAME_DATA <read=KeyFrameData>;
 
 typedef struct (int frameSize){
     // TODO: we need a way to see if all the data is actually being used though
-    KEYFRAME_DATA data[frameSize / 2];
+    KEYFRAME_DATA data[frameSize / 2] <optimize=false>;
 }KEYFRAME <bgcolor=cGreen>;
 
 
 string NodeData(NODE &t) {
-    string nodeData;
+    string nodeData, trans, rot, scale;
+    if (t.hasTrans)
+        SPrintf(trans, "t='%s' ", t.posType);
+    if (t.hasRot)
+        SPrintf(rot, "r='%s' ", t.rotType);
+    if (t.hasScale)
+        SPrintf(scale, "s='%s' ", t.scaType);
     SPrintf(nodeData,
         "hash=0x%08X   data=%s%s%s",
         t.boneHash,
-        t.hasTrans > 0 ? "t" : "",
-        t.hasRot > 0 ? "r" : "",
-        t.hasScale > 0 ? "s" : ""
+        t.hasTrans > 0 ? trans : "",
+        t.hasRot > 0 ? rot : "",
+        t.hasScale > 0 ? scale : ""
     );
     return nodeData;
 }
@@ -157,8 +172,9 @@ string NodeData(NODE &t) {
 string KeyFrameData(KEYFRAME_DATA &kfd) {
     string keyframeData;
     SPrintf(keyframeData,
-        "%s",
-        kfd.used == 0 ? "N" : "Y"
+        "%d %s",
+        kfd.used == 0 ? -1 : kfd.used,
+        kfd.usedBy
     );
     return keyframeData;
 }
@@ -189,40 +205,88 @@ struct FILE{
     local int i;
     local int j;
     local int shortPos;
-    for (i = 0; i < header.boneCount; i++) {
-        for (j = 0; j < header.frameCount; j++) {
-            // keyBase + (x / 2) + shortPos
-            shortPos = 0;
+    for (j = 0; j < header.frameCount; j++) {
+        for (i = 0; i < header.boneCount; i++) {
+            shortPos = nodes.node[i].keyOffset / 2;
             if (nodes.node[i].posType1 == 0) {
+                // Shorts that are transformed into ratios
+                // by dividing by maxShort
+                // X
                 keyframes[j].data[shortPos].used = 1;
+                keyframes[j].data[shortPos].usedBy = "pos0 - X";
                 shortPos++;
-                keyframes[j].data[shortPos].used = 1;
+                // Y
+                keyframes[j].data[shortPos].used = 2;
+                keyframes[j].data[shortPos].usedBy = "pos0 - Y";
                 shortPos++;
-                keyframes[j].data[shortPos].used = 1;
+                // Z
+                keyframes[j].data[shortPos].used = 3;
+                keyframes[j].data[shortPos].usedBy = "pos0 - Z";
                 shortPos++;
             }
             if (nodes.node[i].posType1 == 1) {
 
             }
+            if (nodes.node[i].posType1 == 2) {
+                // Three floats
+                // X
+                keyframes[j].data[shortPos].used = 1;
+                keyframes[j].data[shortPos].usedBy = "pos2 - X";
+                shortPos++;
+                keyframes[j].data[shortPos].used = 2;
+                keyframes[j].data[shortPos].usedBy = "pos2 - X";
+                shortPos++;
+
+                // Y
+                keyframes[j].data[shortPos].used = 3;
+                keyframes[j].data[shortPos].usedBy = "pos2 - Y";
+                shortPos++;
+                keyframes[j].data[shortPos].used = 4;
+                keyframes[j].data[shortPos].usedBy = "pos2 - Y";
+                shortPos++;
+
+                // Z
+                keyframes[j].data[shortPos].used = 5;
+                keyframes[j].data[shortPos].usedBy = "pos2 - Z";
+                shortPos++;
+                keyframes[j].data[shortPos].used = 6;
+                keyframes[j].data[shortPos].usedBy = "pos2 - Z";
+                shortPos++;
+            }
 
             
             if (nodes.node[i].rotType1 == 0) {
-                // UNKNOWN TYPE
+                // Encoded data.
+                // There are 64 bits present for each node of this rot type
+                // The format is: 20bits * 3 of encoded floats, and 4 bits of flags
+                // The flags describe which 3 components of the quaternion are being presented
                 keyframes[j].data[shortPos].used = 1;
+                keyframes[j].data[shortPos].usedBy = "rot0 - word1";
                 shortPos++;
-                keyframes[j].data[shortPos].used = 1;
+                keyframes[j].data[shortPos].used = 2;
+                keyframes[j].data[shortPos].usedBy = "rot0 - word1";
                 shortPos++;
-                keyframes[j].data[shortPos].used = 1;
+                keyframes[j].data[shortPos].used = 3;
+                keyframes[j].data[shortPos].usedBy = "rot0 - word2";
                 shortPos++;
-                keyframes[j].data[shortPos].used = 1;
+                keyframes[j].data[shortPos].used = 4;
+                keyframes[j].data[shortPos].usedBy = "rot0 - word2";
                 shortPos++;
             }
             if (nodes.node[i].rotType1 == 1) {
+                // Shorts that are transformed into ratios
+                // by dividing by maxShort
+                // X
                 keyframes[j].data[shortPos].used = 1;
+                keyframes[j].data[shortPos].usedBy = "rot1 - X";
                 shortPos++;
-                keyframes[j].data[shortPos].used = 1;
+                // Y
+                keyframes[j].data[shortPos].used = 2;
+                keyframes[j].data[shortPos].usedBy = "rot1 - Y";
                 shortPos++;
-                keyframes[j].data[shortPos].used = 1;
+                // Z
+                keyframes[j].data[shortPos].used = 3;
+                keyframes[j].data[shortPos].usedBy = "rot1 - Z";
                 shortPos++;
             }
             if (nodes.node[i].rotType1 == 2 || nodes.node[i].rotType1 == 3) {
@@ -231,17 +295,24 @@ struct FILE{
 
 
             if (nodes.node[i].scaType1 == 0) {
+                // Shorts that are transformed into ratios
+                // by dividing by maxShort
+                // X
                 keyframes[j].data[shortPos].used = 1;
+                keyframes[j].data[shortPos].usedBy = "sca0 - X";
                 shortPos++;
-                keyframes[j].data[shortPos].used = 1;
+                // Y
+                keyframes[j].data[shortPos].used = 2;
+                keyframes[j].data[shortPos].usedBy = "sca0 - Y";
                 shortPos++;
-                keyframes[j].data[shortPos].used = 1;
+                // Z
+                keyframes[j].data[shortPos].used = 3;
+                keyframes[j].data[shortPos].usedBy = "sca0 - Z";
                 shortPos++;
             }
             if (nodes.node[i].scaType1 == 1) {
 
             }
         }
-        
     }
 }file;

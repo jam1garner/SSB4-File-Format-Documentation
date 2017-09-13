@@ -74,12 +74,13 @@ typedef struct (int globalInterOffset){
             float rot_min_z;
             // this is a quaternion where W is calculated from x y and z
         } else if ((rFlag & 0xF0) == 0x60) { // 0x6 in IDA style
-            rotType = "ConstantW";
+            rotType = "Weird encoding";  // need a better name, its weird encoding
             rotType1 = 2;
             float rot_min_x;
             float rot_min_y;
             float rot_min_z;
-            float rot_min_w;
+            float scale; // needs to be divided by MAX_SHORT
+            local float real_scale = scale / 65535;
         } else if ((rFlag & 0xF0) == 0x50) { // 0x5 in IDA style
             rotType = "Interpolated";
             rotType1 = 1;
@@ -160,7 +161,7 @@ string NodeData(NODE &t) {
     if (t.hasScale)
         SPrintf(scale, "s='%s' ", t.scaType);
     SPrintf(nodeData,
-        "hash=0x%08X   data=%s%s%s",
+        "hash=%08X   data=%s%s%s",
         t.boneHash,
         t.hasTrans > 0 ? trans : "",
         t.hasRot > 0 ? rot : "",
@@ -289,7 +290,12 @@ struct FILE{
                 keyframes[j].data[shortPos].usedBy = "rot1 - Z";
                 shortPos++;
             }
-            if (nodes.node[i].rotType1 == 2 || nodes.node[i].rotType1 == 3) {
+            if (nodes.node[i].rotType1 == 2) {
+                keyframes[j].data[shortPos].used = 1;
+                keyframes[j].data[shortPos].usedBy = "rot2 - ?";
+                shortPos++;
+            }
+            if (nodes.node[i].rotType1 == 3) {
 
             }
 

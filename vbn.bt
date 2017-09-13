@@ -33,10 +33,10 @@ struct FILE{
     };
 
     struct BONES{
-        BONE normalBones[header.normalBoneCount];
-        BONE unknownBones[header.unknownBoneCount];
-        BONE HLPBones[header.HLPBoneCount];
-        BONE SWGBones[header.SWGBoneCount];
+        BONE normalBones[header.normalBoneCount]<read=BoneData>;
+        BONE unknownBones[header.unknownBoneCount]<read=BoneData>;
+        BONE HLPBones[header.HLPBoneCount]<read=BoneData>;
+        BONE SWGBones[header.SWGBoneCount]<read=BoneData>;
     }bones<bgcolor=cRed>;
 
     struct BONEDATA{
@@ -58,3 +58,9 @@ struct FILE{
         BONEDATA SWGBones[header.SWGBoneCount];
     }bonesdata<bgcolor=cBlue>;
 }file;
+
+string BoneData(BONE &b) {
+    string out;
+    SPrintf(out, "%s %X", b.boneName, b.boneHash);
+    return out;
+}

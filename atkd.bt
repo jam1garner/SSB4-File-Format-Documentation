@@ -2,7 +2,7 @@
 //--- 010 Editor v7.0.2 Binary Template
 //
 //      File: Smash 4 AI Attack Data
-//   Authors: Jam1garner
+//   Authors: Jam1garner, Ben Hall
 //   Version: 1.0
 //   Purpose: AI
 //  Category: 
@@ -15,15 +15,15 @@ BigEndian();
 struct HEADER{
     char magic[4];
     int entryCount;
-    int unk1;
-    int unk2;
+    int firstSpecialSubactionIndex;
+    int specialSubactionCount;//this + previous value will be the first subactionIndex after Final Smash
 }header<bgcolor=cGreen>;
 
 struct ENTRY{
-    ushort attackId;
+    ushort subactionIndex;
     ushort unk; //may be bone index? (according to KingClubber)
-    ushort start;
-    ushort end;
+    ushort firstFrame;
+    ushort lastFrame;
     float xmin;
     float xmax;
     float ymin;

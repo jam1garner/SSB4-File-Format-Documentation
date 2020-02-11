@@ -1,0 +1,427 @@
+//------------------------------------------------
+//--- 010 Editor v10.0 Binary Template
+//
+//      File: Lumen
+//   Authors: Y2K (https://github.com/Y2K-x)
+//   Version: 1.0
+//------------------------------------------------
+enum <short> PLACEFLAG {
+	Place = 0x01,
+	Move = 0x02
+};
+
+enum <short> BLENDMODE {
+	Normal = 0x00,
+	Layer = 0x02,
+	Multiply = 0x03,
+	Screen = 0x04,
+	Lighten = 0x05,
+	Darken = 0x06,
+	Difference = 0x07,
+	Add = 0x08,
+	Subtract = 0x09,
+	Invert = 0x0A,
+	Alpha = 0x0B,
+	Erase = 0x0C,
+	Overlay = 0x0D,
+	Hardlight = 0x0E
+};
+
+enum <short> FILLTYPE {
+	Solid = 0x00,
+	LinearGradient = 0x10,
+	RadialGradient = 0x12,
+	FocalRadialGradient = 0x13,
+	RepeatingBitmap = 0x40,
+	ClippedBitmap = 0x41,
+	NonSmoothedRepeatingBitmap = 0x42,
+	NonSmoothedClippedBitmap = 0x43
+};	
+
+//marked all the things im handling, ones marked done are properly parsed, unimplementeds are unknown
+enum <uint> TAGTYPE {
+    Invalid = 0x0000, //done
+    
+    Fonts = 0x000A, //unimplemented
+    Symbols = 0xF001, //done
+    Colors = 0xF002, //done
+    Transforms = 0xF003, //done
+    Bounds = 0xF004, //done
+    ActionScript = 0xF005, //unimplemented
+    ActionScript2 = 0xFF05,
+    TextureAtlases = 0xF007, //done
+    UnkF008 = 0xF008, //unimplemented
+    UnkF009 = 0xF009, //unimplemented
+    UnkF00A = 0xF00A, //unimplemented
+    UnkF00B = 0xF00B, //unimplemented
+    Properties = 0xF00C, //done
+    Defines = 0xF00D, //done
+    
+    Shape = 0xF022, //done
+    Graphic = 0xF024, //done
+    ColorMatrix = 0xF037, //unimplemented
+    Positions = 0xF103, //done
+    
+    DynamicText = 0x0025,
+    DefineSprite = 0x0027, //done
+    
+    FrameLabel = 0x002B, //done
+    ShowFrame = 0x0001, //done
+    Keyframe = 0xF105, //done
+    PlaceObject = 0x0004, //done
+    RemoveObject = 0x0005, //done
+    DoAction = 0x000C, //done
+    
+    End = 0xFF00
+};
+
+typedef struct {
+	short r;
+	short g;
+	short b;
+	short a;
+} Color;
+
+typedef struct {
+    int len;
+    char str[len + (4 - (len % 4))];
+} Symbol;
+
+typedef struct {
+	float xScale;
+	float xSkew;
+	float xTransform;
+	float yScale;
+	float ySkew;
+	float yTranform;
+} Transform;
+
+typedef struct {
+	float x;
+	float y;
+} Position;
+
+typedef struct {
+	float top;
+	float left;
+	float bottom;
+	float right;
+} Bound;
+
+typedef struct {
+	int id;
+	int nameId;
+	float width;
+	float height;
+} TexAtlas;
+
+typedef struct {
+	int tag <format=hex>;
+	int tagSize;
+	char data[tagSize * 4] <format=hex>;
+} UnimplementedTag;
+
+typedef struct {
+	float x;
+	float y;
+	float u;
+	float v;
+} Vertex;
+
+typedef struct {
+	int tag <format=hex>;
+	int tagSize;
+	int atlasId;
+	FILLTYPE fillType;
+	ushort numVerts;
+	int numIndices;
+	Vertex verts[numVerts];
+	ushort indices[numIndices];
+} Graphic;
+
+typedef struct {
+	int tag <format=hex>;
+	int tagSize;
+	int nameId;
+	int startFrame;
+	int unk1;
+} Label;
+
+typedef struct {
+	int unk0;
+	int numItems;
+	
+	local int i;
+	local TAGTYPE childTag;
+	for(i = 0; i < numItems; i++) {
+		childTag = ReadInt();
+		
+		switch(childTag) {
+			case RemoveObject:
+				struct REMOVEOBJECT {
+					int tag <format=hex>;
+					int tagSize;
+					int unk1;
+					short depth;
+					short unk2;
+				} removeObject;
+				
+				break;
+			case DoAction:
+				struct DOACTION {
+					int tag <format=hex>;
+					int tagSize;
+					int actionID;
+					int unk1;
+				} doAction;
+				
+				break;
+			case PlaceObject:
+				struct PLACEOBJECT {
+					int tag <format=hex>;
+					int tagSize;
+					int characterId;
+					int placementId;
+					int unk1;
+					int nameId;
+					PLACEFLAG flags;
+					BLENDMODE blendMode;
+					short depth;
+					short unk4;
+					short unk5;
+					short unk6;
+					ushort positionFlags;
+					ushort positionId;
+					int colorMultId;
+					int ColorAddId;
+					
+					int hasColorMatrix;
+					int hasUnkF014;
+					
+					if(hasColorMatrix)
+						UnimplementedTag ColorMatrix;
+					if(hasUnkF014)
+						UnimplementedTag UnkF014;
+				} placeObject;
+				
+				break;
+		}
+	}
+} Frame;
+
+local TAGTYPE tagtype;
+
+BigEndian(); //Define endianess
+
+struct HEADER {
+    char magic[4] <comment="LMB">;
+    int unk0;
+    int unk1;
+    int unk2;
+    int unk3;
+    int unk4;
+    int unk5;
+    int filesize;
+    int unk6;
+    int unk7;
+    int unk8;
+    int unk9;
+    int unk10;
+    int unk11;
+    int unk12;
+    int unk13;
+} header <bgcolor=cLtGray>;
+
+local int done = false;
+
+while(!done) {
+    tagtype = ReadInt();
+    
+    switch(tagtype) {
+        case Invalid:
+            Assert(0, "Invalid tag encountered, malformed file.");
+
+            break;
+        case Symbols:
+            struct SYMBOLS {
+                int tag <format=hex>;
+                int tagSize;
+                int symbolCount;
+                Symbol symbol[symbolCount] <optimize=false>;
+            } symbols <bgcolor=cBlue>;
+
+            break;
+		case Colors:
+			struct COLORS {
+				int tag <format=hex>;
+				int tagSize;
+				int colorCount;
+				Color colors[colorCount];
+			} colors <bgcolor=cRed>;
+			
+			break;
+		case Transforms:
+			struct TRANSFORMS {
+				int tag <format=hex>;
+				int tagSize;
+				int transformCount;
+				Transform transforms[transformCount];
+			} transforms <bgcolor=cLtRed>;
+			
+			break;
+		case Positions:
+			struct POSITIONS {
+				int tag <format=hex>;
+				int tagSize;
+				int positionCount;
+				Position positions[positionCount];
+			} positions <bgcolor=cLtBlue>;
+			
+			break;
+		case Bounds:
+			struct BOUNDS {
+				int tag <format=hex>;
+				int tagSize;
+				int boundCount;
+				Bound bounds[boundCount];
+			} bounds <bgcolor=cGreen>;
+			
+			break;
+		case TextureAtlases:
+			struct TEXATLASES {
+				int tag <format=hex>;
+				int tagSize;
+				int atlasCount;
+				TexAtlas texAtlas[atlasCount];
+			} texAtlases <bgcolor=cPurple>;
+			
+			break;
+		case Properties:
+			struct PROPERTIES {
+				int tag <format=hex>;
+				int tagSize;
+				uint unk0;
+				uint unk1;
+				uint unk2;
+				uint maxCharacterId;
+				int unk4;
+				uint maxCharacterId2;
+				ushort maxDepth;
+				ushort unk7;
+				float framerate;
+				float width;
+				float height;
+				uint unk8;
+				uint unk9;
+			} properties <bgcolor=cLtGreen>;
+			
+			break;
+		case Defines:
+			struct DEFINES {
+				int tag <format=hex>;
+				int tagSize;
+				uint numShapes;
+				uint unk1;
+				uint numSprites;
+				uint unk3;
+				uint numTexts;
+				uint unk5;
+				uint unk6;
+				uint unk7;
+			} defines <bgcolor=cLtPurple>;
+			
+			break;
+		case Shape:
+			struct SHAPE {
+				int tag <format=hex>;
+				int tagSize;
+				int characterId;
+				int unk1;
+				int boundsId;
+				int unk3;
+				int numGraphics;
+				Graphic graphics[numGraphics] <optimize=false,bgcolor=cLtYellow>;
+			} shape <bgcolor=cYellow>;
+			
+			break;
+		case DefineSprite:
+			struct SPRITE {
+				int tag <format=hex>;
+				int tagSize;
+				int characterId;
+				int unk1;
+				int unk2;
+				int numLables;
+				int numFrames;
+				int numKeyFrames;
+				int unk3;
+				Label labels[numLables]; //will not generate if no labels are present
+				
+				local int totalFrames = numFrames + numKeyFrames;
+				local int i;
+				local TAGTYPE frameTag;
+				for(i = 0; i < totalFrames; i++) {
+					frameTag = ReadInt();
+					
+					switch(frameTag) {
+						case ShowFrame:
+							struct SHOWFRAME {
+								int tag <format=hex>;
+								int tagSize;
+								Frame frame;
+							} showFrame;
+							
+							break;
+						case Keyframe:
+							struct KEYFRAME {
+								int tag <format=hex>;
+								int tagSize;
+								Frame frame;
+							} keyFrame;
+							
+							break;
+					}
+				}
+			} sprite <bgcolor=cAqua>;
+			
+			break;
+		case ActionScript:
+			UnimplementedTag ActionScript;
+			
+			break;
+		case ActionScript2:
+			UnimplementedTag ActionScript2;
+			
+			break;
+		case UnkF008:
+			UnimplementedTag UnkF008;
+			
+			break;
+		case UnkF009:
+			UnimplementedTag UnkF009;
+			
+			break;
+		case UnkF00A:
+			UnimplementedTag UnkF00A;
+			
+			break;
+		case UnkF00B:
+			UnimplementedTag UnkF00B;
+			
+			break;
+		case Fonts:
+			UnimplementedTag Fonts;
+			
+			break;
+		case End:
+			done = true;
+			
+			break;
+		default:
+			local string message;
+			SPrintf(message, "Unknown tag! Offset: 0x%x, Tag: 0x%x", FTell(), tagtype);
+			Assert(0, message);
+			
+			break;
+    };
+}

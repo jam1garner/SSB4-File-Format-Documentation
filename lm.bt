@@ -50,6 +50,8 @@ enum <uint> TAGTYPE {
     ActionScript = 0xF005, //unimplemented
     ActionScript2 = 0xFF05,
     TextureAtlases = 0xF007, //done
+	Unk0007 = 0x0007, //done, unknown though
+	Unk000B = 0x000B,
     UnkF008 = 0xF008, //unimplemented
     UnkF009 = 0xF009, //unimplemented
     UnkF00A = 0xF00A, //unimplemented
@@ -72,7 +74,13 @@ enum <uint> TAGTYPE {
     RemoveObject = 0x0005, //done
     DoAction = 0x000C, //done
     
-    End = 0xFF00
+    End = 0xFF00 //done
+};
+
+enum <short> TEXTALIGN {
+	Left = 0,
+	Right = 1,
+	Center = 2
 };
 
 typedef struct {
@@ -207,11 +215,42 @@ typedef struct {
 				break;
 		}
 	}
-} Frame;
+} Frame <bgcolor=cLtAqua>;
+
+typedef struct {
+	int tag <format=hex>;
+	int tagSize;
+	int unk0;
+	int unk1;
+	int unk2;
+	int unk3;
+	int unk4;
+	int unk5;
+} UnkF018;
+
+typedef struct {
+	int tag <format=hex>;
+	int tagSize;
+	int unk0;
+	int unk1;
+	int unk2;
+	int unk3;
+	int unk4;
+	int unk5;
+} UnkF00E;
 
 local TAGTYPE tagtype;
 
+//for pretty-ing the template output
+local uint num_Shapes;
+local uint num_Sprites;
+local uint num_Unk000B;
+local uint num_Unk0007;
+local uint num_Texts;
+
 BigEndian(); //Define endianess
+
+// ~! FILE START !~
 
 struct HEADER {
     char magic[4] <comment="LMB">;
@@ -320,10 +359,15 @@ while(!done) {
 			struct DEFINES {
 				int tag <format=hex>;
 				int tagSize;
+				num_Shapes = ReadUInt();
 				uint numShapes;
-				uint unk1;
+				num_Unk0007 = ReadUInt();
+				uint numUnk0007;
+				num_Sprites = ReadUInt();
 				uint numSprites;
-				uint unk3;
+				num_Unk000B = ReadUInt();
+				uint numUnk000B;
+				num_Texts = ReadUInt();
 				uint numTexts;
 				uint unk5;
 				uint unk6;
@@ -332,57 +376,66 @@ while(!done) {
 			
 			break;
 		case Shape:
-			struct SHAPE {
-				int tag <format=hex>;
-				int tagSize;
-				int characterId;
-				int unk1;
-				int boundsId;
-				int unk3;
-				int numGraphics;
-				Graphic graphics[numGraphics] <optimize=false,bgcolor=cLtYellow>;
-			} shape <bgcolor=cYellow>;
-			
+			struct SHAPES {
+				local int i;
+				for(i = 0; i < num_Shapes; i++) {
+					struct SHAPE {
+						int tag <format=hex>;
+						int tagSize;
+						int characterId;
+						int unk1;
+						int boundsId;
+						int unk3;
+						int numGraphics;
+						Graphic graphics[numGraphics] <optimize=false,bgcolor=cLtYellow>;
+					} shape;
+				}
+			} shapes <bgcolor=cYellow>;
 			break;
 		case DefineSprite:
-			struct SPRITE {
-				int tag <format=hex>;
-				int tagSize;
-				int characterId;
-				int unk1;
-				int unk2;
-				int numLables;
-				int numFrames;
-				int numKeyFrames;
-				int unk3;
-				Label labels[numLables]; //will not generate if no labels are present
-				
-				local int totalFrames = numFrames + numKeyFrames;
+			struct SPRITES {
 				local int i;
-				local TAGTYPE frameTag;
-				for(i = 0; i < totalFrames; i++) {
-					frameTag = ReadInt();
-					
-					switch(frameTag) {
-						case ShowFrame:
-							struct SHOWFRAME {
-								int tag <format=hex>;
-								int tagSize;
-								Frame frame;
-							} showFrame;
+				for(i = 0; i < num_Sprites; i++) {
+					struct SPRITE {
+						int tag <format=hex>;
+						int tagSize;
+						int characterId;
+						int unk1;
+						int unk2;
+						int numLables;
+						int numFrames;
+						int numKeyFrames;
+						int unk3;
+						Label labels[numLables]; //will not generate if no labels are present
+						
+						local int totalFrames = numFrames + numKeyFrames;
+						local int j;
+						local TAGTYPE frameTag;
+						for(j = 0; j < totalFrames; j++) {
+							frameTag = ReadInt();
 							
-							break;
-						case Keyframe:
-							struct KEYFRAME {
-								int tag <format=hex>;
-								int tagSize;
-								Frame frame;
-							} keyFrame;
-							
-							break;
-					}
+							switch(frameTag) {
+								case ShowFrame:
+									struct SHOWFRAME {
+										int tag <format=hex>;
+										int tagSize;
+										Frame frame;
+									} showFrame;
+									
+									break;
+								case Keyframe:
+									struct KEYFRAME {
+										int tag <format=hex>;
+										int tagSize;
+										Frame frame;
+									} keyFrame;
+									
+									break;
+							}
+						}
+					} sprite;
 				}
-			} sprite <bgcolor=cAqua>;
+			} sprites <bgcolor=cAqua>;	
 			
 			break;
 		case ActionScript:
@@ -392,6 +445,73 @@ while(!done) {
 		case ActionScript2:
 			UnimplementedTag ActionScript2;
 			
+			break;
+		case DynamicText:
+			struct DYNAMICTEXTS {
+				local int i;
+				for(i = 0; i < num_Texts; i++) {
+					struct DYNAMICTEXT {
+						int tag <format=hex>;
+						int tagSize;
+						int chr_id;
+						int unk0;
+						int placeholderTextId;
+						int unk1;
+						int strokeColorId;
+						int unk2;
+						int unk3;
+						int unk4;
+						TEXTALIGN textAlign;
+						short unk5;
+						int unk6;
+						int unk7;
+						float size;
+						int unk8;
+						int unk9;
+						int unk10;
+						int unk11;
+					} dynamicText;
+				}
+			} dynamicTexts <bgcolor=cPurple>;
+			
+			break;
+		case Unk0007:
+			struct UNK0007S {
+				local int i;
+				for(i = 0; i < num_Unk0007; i++) {
+					struct UNK0007 {
+						int tag <format=hex>;
+						int tagSize;
+						int unk0;
+						int unk1;
+						int unk2;
+						int unk3;
+						int unk4;
+						int numUnkf018;
+						int unk5;
+						
+						UnkF018 unkf018[numUnkf018];
+					} unk0007;
+				}
+			} unk0007s;
+			break;
+		case Unk000B:
+			struct UNK000BS {
+				local int i;
+				for(i = 0; i < num_Unk000B; i++) {
+					struct UNK000B {
+						int tag <format=hex>;
+						int tagSize;
+						int unk0;
+						int unk1;
+						int unk2;
+						int unk3;
+						int numUnkf00e;
+						
+						UnkF00E unkf00e[numUnkf00e];
+					} unk000B;
+				}
+			} unk000bs;
 			break;
 		case UnkF008:
 			UnimplementedTag UnkF008;
